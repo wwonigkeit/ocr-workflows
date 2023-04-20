@@ -1,0 +1,37 @@
+description: "OCR workflow using tesseract or serverless code execution example for using a Golang container"
+
+# This can be tested usng the following curl command to test:
+
+functions:
+  # - id: golang
+  #   image: gcr.io/direktiv/functions/golang:1.1
+  #   type: knative-workflow
+  - id: tesseract-ocr
+    image: wwonigkeit/tesseract-ocr:1.0
+    type: knative-workflow
+
+states:
+  - id: tesseract-ocr
+    type: action
+    action:
+      function: tesseract-ocr
+      files:
+      - key: image.png
+        scope: workflow
+      input:
+        commands:
+        - command: tesseract --version
+        - command: tesseract image.png out/workflow/text
+
+  # - id: run-code
+  #   type: action
+  #   action:
+  #     function: golang
+  #     input:
+  #       commands:
+  #       - command: go mod init go-ocr
+  #       - command: go mod tidy
+  #       - command: go run go-ocr.go
+  #     files:
+  #     - key: go-ocr.go
+  #       scope: workflow
