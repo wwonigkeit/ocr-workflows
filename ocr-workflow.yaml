@@ -143,6 +143,7 @@ states:
           to:
           - wwonigkeit@iqconsult.com.au
           - cgrobbelaar@iqconsult.com.au
+          - matthewwebster@iqconsult.com.au
           subject: 'Tesseract OCR conversion for jq(.url)'
           message:
             name: message
