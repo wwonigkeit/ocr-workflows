@@ -31,7 +31,12 @@ functions:
   # Send email container
   - id: send-email
     image: gcr.io/direktiv/functions/sendmail:1.0
-    type: knative-workflow  
+    type: knative-workflow
+
+  # Function for the Microsoft Teams webhook message transport
+  - id: teams
+    image: gcr.io/direktiv/functions/teams:1.0
+    type: knative-workflow
 
 states:
   # - id: run-code
@@ -144,3 +149,34 @@ states:
           attachments:
           - text.txt=UTF-8
           contentType: "text/plain"
+    transition: send-teams
+
+  #
+  # First state entry: send a message to Microsoft Teams
+  #
+  - id: send-teams
+    type: action
+    action:
+      function: teams
+      secrets: ["TEAMS_WEBHOOK_URL"]
+      input: 
+        webhook-url: jq(.secrets.TEAMS_WEBHOOK_URL)
+        verbose: true
+        content:
+          type: message
+          attachments:
+          - contentType: application/vnd.microsoft.card.adaptive
+            content:
+              "$schema": http://adaptivecards.io/schemas/adaptive-card.json
+              type: AdaptiveCard
+              version: '1.2'
+              body:
+              - type: TextBlock
+                size: Medium
+                weight: Bolder
+                text: Result from OCR image analysis
+                wrap: true
+              - type: FactSet
+                facts:
+                - title: Id
+                  value: jq(.ocrtext)  
