@@ -18,6 +18,7 @@ functions:
   - id: tesseract-ocr
     image: wwonigkeit/tesseract-ocr:1.0
     type: knative-workflow
+    size: large
     
   - id: http-request
     image: gcr.io/direktiv/functions/http-request:1.0
