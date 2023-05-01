@@ -79,15 +79,16 @@ states:
         scope: instance
       input:
         commands:
-        - command: tesseract --version
-        - command: tesseract image.png out/instance/text
-    transition: get-text
-    
-  - id: get-text
-    type: getter
+        - command: tesseract image.png stdout
+    transition: store-text
+    transform: 'jq( . += { ocrtext: .return."tesseract-ocr"[0].result } | del(.return) )'
+
+  - id: store-text
+    type: setter
     variables:
     - key: text.txt
-      scope: instance
+      scope: workflow
+      mimeType: text/plain
     transition: slack-message
 
   #
@@ -106,7 +107,7 @@ states:
           - type: section
             text:
               type: mrkdwn
-              text: '*Converted text:* ```jq(.var."text.txt")```'
+              text: '*Converted text:* ```jq(.ocrtext)```'
             accessory:
               type: image
               image_url: jq(.url)
@@ -122,6 +123,9 @@ states:
     type: action
     action:
       secrets: ["EMAIL_USER", "EMAIL_PASSWORD"]
+      files:
+      - key: text.txt
+        scope: workflow
       function: send-email
       input: 
         smtp:
@@ -136,5 +140,7 @@ states:
           subject: 'Tesseract OCR conversion for jq(.url)'
           message:
             name: message
-            data: 'jq(.var."text.txt")'
-          contentType: text/html
+            data: 'The attachment in this email is the OCR conversion for the following file jq(.url)'
+          attachments:
+          - text.txt=UTF-8
+          contentType: "text/plain"
