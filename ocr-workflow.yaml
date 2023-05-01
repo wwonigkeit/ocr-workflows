@@ -94,6 +94,7 @@ states:
     - key: text.txt
       scope: workflow
       mimeType: text/plain
+      value: 'jq(.ocrtext)'
     transition: slack-message
 
   #
